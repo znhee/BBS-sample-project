@@ -18,6 +18,8 @@
             
             <!-- =================== main =================== -->
             <div class="col-sm-9">
+            	<h3><strong>회원 가입</strong></h3>
+            	<hr>
                 <div class="row">
 			        <div class="col-3"></div>
 			        <div class="col-6">

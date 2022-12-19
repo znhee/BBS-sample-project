@@ -16,7 +16,7 @@
         <div class="row">
             <%@ include file="../common/aside.jsp" %>
             
-            <!-- ========================= main  ========================= -->
+            <!-- =================== main =================== -->
             <div class="col-sm-9">
                 <table class="table table-sm table-borderless">
                     <form action="" method="post">
@@ -78,8 +78,8 @@
                     <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
                 </ul>
             </div>
+            <!-- =================== main =================== -->
             
-            <!-- ========================= main  ========================= -->
         </div>
     </div>
 

@@ -18,7 +18,7 @@ import org.mindrot.jbcrypt.BCrypt;
  * Servlet implementation class UserServiceController
  */
 @WebServlet({ "/user/list", "/user/login", "/user/logout",
-			  "/user/register", "/user/update", "/user/delete" })
+			  "/user/register", "/user/update", "/user/delete", "/user/deleteConfirm" })
 public class UserController extends HttpServlet {
 	
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -27,6 +27,7 @@ public class UserController extends HttpServlet {
 		String action = uri[uri.length - 1];
 		UserDao dao = new UserDao();
 		HttpSession session = request.getSession();
+		session.setAttribute("menu", "user");
 		
 		response.setContentType("text/html; charset=utf-8");
 		String uid = null, pwd = null, pwd2 = null, uname = null, email = null;
@@ -75,7 +76,7 @@ public class UserController extends HttpServlet {
 			break;
 		case "logout":
 			session.invalidate();
-			response.sendRedirect("/bbs/user/list");
+			response.sendRedirect("/bbs/user/login");
 			break;
 		case "register":
 			if (request.getMethod().equals("GET")) {
@@ -89,7 +90,7 @@ public class UserController extends HttpServlet {
 				if (pwd.equals(pwd2)) {
 					u = new User(uid, pwd, uname, email);
 					dao.registerUser(u);
-					response.sendRedirect("/bbs/user/list");
+					response.sendRedirect("/bbs/user/login");
 				} else {
 					request.setAttribute("msg", "패스워드 입력이 잘못되었습니다.");
 					request.setAttribute("url", "/bbs/user/register");
@@ -116,6 +117,10 @@ public class UserController extends HttpServlet {
 			}
 			break;
 		case "delete":
+			uid = request.getParameter("uid");
+			response.sendRedirect("/bbs/user/delete.jsp?uid=" + uid);
+			break;
+		case "deleteConfirm":
 			uid = request.getParameter("uid");
 			dao.deleteUser(uid);
 			response.sendRedirect("/bbs/user/list");

@@ -31,7 +31,7 @@ public class UserDao {
 	
 	public void deleteUser(String uid) {
 		Connection conn = getConnection();
-		String sql = "DELETE FROM users WHERE uid=?;";
+		String sql = "UPDATE users SET isDeleted=1 WHERE uid=?;";
 		try {
 			PreparedStatement pStmt = conn.prepareStatement(sql);
 			pStmt.setString(1, uid);
@@ -85,7 +85,7 @@ public class UserDao {
 	
 	public List<User> listUsers() {
 		Connection conn = getConnection();
-		String sql = "SELECT * FROM users ORDER BY regDate, uid;";
+		String sql = "SELECT * FROM users WHERE isDeleted=0 ORDER BY regDate DESC, uid LIMIT 10;";
 		List<User> list = new ArrayList<>();
 		try {
 			Statement stmt = conn.createStatement();

@@ -10,15 +10,15 @@
                     <a class="nav-link" href="#"><i class="fa-solid fa-house"></i> Home</a>
                 </li>
                 <li class="nav-item ms-3">
-                    <a class="nav-link active" href="#"><i class="far fa-list-alt"></i> 게시판</a>
+                    <a class="nav-link ${(menu eq 'board') ? "active" : ''}" href="#"><i class="far fa-list-alt"></i> 게시판</a>
                 </li>
                 <li class="nav-item ms-3">
-                    <a class="nav-link" href="#"><i class="fas fa-user-friends"></i> 사용자</a>
+                    <a class="nav-link ${(menu eq 'user') ? "active" : ''}" href="/bbs/user/list"><i class="fas fa-user-friends"></i> 사용자</a>
                 </li>
                 <li class="nav-item ms-3">
-                    <a class="nav-link" href="#"><i class="fas fa-sign-out-alt"></i> 로그아웃</a>
+                    <a class="nav-link" href="/bbs/user/logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</a>
                 </li>
             </ul>
-            <span class="navbar-text me-3">홍길동님 환영합니다.</span>
+            <span class="navbar-text me-3">${uname}님 환영합니다.</span>
         </div>
     </nav>

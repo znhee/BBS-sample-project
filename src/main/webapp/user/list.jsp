@@ -11,7 +11,7 @@
     </style>
 </head>
 
-<body>
+<body style="height: 2000px">
     <%@ include file="../common/top.jsp" %>
 
     <div class="container" style="margin-top: 80px;">
@@ -62,9 +62,11 @@
                  	</table>    
                  	<ul class="pagination justify-content-center">
 	                    <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-	                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-	                    <li class="page-item active"><a class="page-link" href="#">2</a></li>
-	                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+	                <c:forEach var="page" items="${pageList}" varStatus="loop">    
+	                    <li class="page-item ${(currentUserPage eq page) ? 'active' : ''}">
+	                    	<a class="page-link" href="/bbs/user/list?page=${page}">${page}</a>
+	                    </li>
+	                </c:forEach>   
 	                    <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
 	                </ul>        
                 </div>

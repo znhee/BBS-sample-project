@@ -94,8 +94,7 @@ public class BoardDao {
 			pStmt.setString(4, b.getFiles());
 			
 			pStmt.executeUpdate();
-			pStmt.close();
-			conn.close();
+			pStmt.close(); conn.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -131,5 +130,66 @@ public class BoardDao {
 			e.printStackTrace();
 		}
 		return b;
+	}
+	
+	public void increaseViewCount(int bid) {
+		Connection conn = getConnection();
+		String sql = "UPDATE board SET viewCount=viewCount+1 WHERE bid=?;";
+		try {
+			PreparedStatement pStmt = conn.prepareStatement(sql);
+			pStmt.setInt(1, bid);
+			
+			pStmt.executeUpdate();
+			pStmt.close(); conn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void increaseReplyCount(int bid) {
+		Connection conn = getConnection();
+		String sql = "UPDATE board SET replyCount=replyCount+1 WHERE bid=?;";
+		try {
+			PreparedStatement pStmt = conn.prepareStatement(sql);
+			pStmt.setInt(1, bid);
+			
+			pStmt.executeUpdate();
+			pStmt.close(); conn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void deleteBoard(int bid) {
+		Connection conn = getConnection();
+		String sql = "UPDATE board SET isDeleted=1 WHERE bid=?;";
+		try {
+			PreparedStatement pStmt = conn.prepareStatement(sql);
+			pStmt.setInt(1, bid);
+			
+			pStmt.executeUpdate();
+			pStmt.close(); conn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void updateBoard(Board board) {
+		Connection conn = getConnection();
+		String sql = "UPDATE board SET title=?, content=?,"
+				   + "	modTime=NOW(), files=? WHERE bid=?;";
+		try {
+			PreparedStatement pStmt = conn.prepareStatement(sql);
+			pStmt.setString(1, board.getTitle());
+			pStmt.setString(2, board.getContent());
+			pStmt.setString(3, board.getFiles());
+			pStmt.setInt(4, board.getBid());
+			
+			pStmt.executeUpdate();
+			pStmt.close(); conn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

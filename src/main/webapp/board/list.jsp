@@ -11,7 +11,7 @@
     </style>
 </head>
 
-<body>
+<body style="height: 2000px">
     <%@ include file="../common/top.jsp" %>
 
     <div class="container" style="margin-top: 80px;">
@@ -59,7 +59,7 @@
                     <tr>
                         <td>${board.bid}</td>
                         <td>
-                        	<a href="/bbs/board/detail?bid=${board.bid}">${board.title}
+                        	<a href="/bbs/board/detail?bid=${board.bid}&uid=${board.uid}">${board.title}
                         	<c:if test="${board.replyCount ge 1}">
                             	<span class="text-danger">[${board.replyCount}]</span>
                             </c:if>
@@ -67,12 +67,12 @@
                         </td>
                         <td>${board.uname}</td>
                         <td>
-                        	<c:if test="${today eq fn:substring(board.modTime, 0, 10)}">
-                        		${fn:substring(board.modTime, 11, 19)}
-                        	</c:if>
-                        	<c:if test="${not (today eq fn:substring(board.modTime, 0, 10))}">
-                        		${fn:substring(board.modTime, 0, 10)}
-                        	</c:if>
+                        <c:if test="${today eq fn:substring(board.modTime, 0, 10)}">
+                        	${fn:substring(board.modTime, 11, 19)}
+                        </c:if>
+                        <c:if test="${not (today eq fn:substring(board.modTime, 0, 10))}">
+                        	${fn:substring(board.modTime, 0, 10)}
+                        </c:if>
                         </td>
                         <td>${board.viewCount}</td>
                     </tr>
@@ -80,11 +80,11 @@
                 </table>
                 <ul class="pagination justify-content-center mt-4">
                     <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                    <c:forEach var="page" items="${pageList}" varStatus="loop">    
+	                <c:forEach var="page" items="${pageList}" varStatus="loop">    
 	                    <li class="page-item ${(currentBoardPage eq page) ? 'active' : ''}">
 	                    	<a class="page-link" href="/bbs/board/list?page=${page}">${page}</a>
 	                    </li>
-	                </c:forEach>  
+	                </c:forEach>                      
                     <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
                 </ul>
             </div>

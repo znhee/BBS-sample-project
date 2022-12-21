@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%	pageContext.setAttribute("newline", "\n"); %>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -11,7 +12,7 @@
     </style>
 </head>
 
-<body style="height:2000px">
+<body style="height: 2000px">
     <%@ include file="../common/top.jsp" %>
 
     <div class="container" style="margin-top: 80px;">
@@ -55,32 +56,37 @@
 
                     <div class="col-12"><hr></div>
                     <div class="col-12">
-                        ${board.content}
+                        ${fn:replace(board.content, newline, '<br>')}
                     </div>
 
                     <div class="col-12"><hr></div>
                     <div class="col-12">
+                    <c:forEach var="reply" items="${replyList}">
+                    <c:if test="${reply.isMine eq 0}">
                         <div class="d-flex flex-row mt-1">
                             <div class="card bg-light text-dark w-75">
                                 <div class="card-body">
-                                    마리아&nbsp;&nbsp;2022-05-17 14:30:28<br>    <!-- uname, regTime-->
-                                    저도 궁금합니다.😆  <!-- content -->
+                                    ${reply.uname}&nbsp;&nbsp;${fn:replace(reply.regDate, 'T', ' ')}<br>  
+                                    ${fn:replace(reply.content, newline, '<br>')}  <!-- content -->
                                 </div>
                             </div>
                         </div>
-                        
+                    </c:if>
+                    <c:if test="${reply.isMine eq 1}">
                         <div class="d-flex flex-row-reverse mt-1">
                             <div class="card w-75">
                                 <div class="card-body text-end">
-                                    김은숙&nbsp;&nbsp;2022-05-17 14:30:28<br>    <!-- uname, regTime-->
-                                    email로 문의해 주시면 친절하게 안내해 드릴게요.😄👍😆
+                                    ${reply.uname}&nbsp;&nbsp;${fn:replace(reply.regDate, 'T', ' ')}<br>  
+                                    ${fn:replace(reply.content, newline, '<br>')}  <!-- content -->
                                 </div>
                             </div>
                         </div>
+                    </c:if>
+                    </c:forEach>
                             
                         <form class="form-inline" action="/bbs/board/reply" method="post">
-                            <input type="hidden" name="bid" value="">     <!-- bid -->
-                            <input type="hidden" name="uid" value="">     <!-- uid -->
+                            <input type="hidden" name="bid" value="${board.bid}">     <!-- bid -->
+                            <input type="hidden" name="uid" value="${board.uid}">     <!-- uid -->
                             <table class="table table-borderless mt-2">
                                 <tr class="d-flex">
                                     <td class="col-1 text-end">

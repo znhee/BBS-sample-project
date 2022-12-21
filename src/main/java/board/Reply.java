@@ -11,19 +11,17 @@ public class Reply {
 	private int bid;
 	private String uname;
 	
-	Reply() {}
+	public Reply() {}
 	
-	Reply(int rid, String content, LocalDateTime regDate, int isMine, String uid, int bid) {
+	public Reply(String content, int isMine, String uid, int bid) {
 		super();
-		this.rid = rid;
 		this.content = content;
-		this.regDate = regDate;
 		this.isMine = isMine;
 		this.uid = uid;
 		this.bid = bid;
 	}
 
-	Reply(int rid, String content, LocalDateTime regDate, int isMine, String uid, int bid, String uname) {
+	public Reply(int rid, String content, LocalDateTime regDate, int isMine, String uid, int bid, String uname) {
 		this.rid = rid;
 		this.content = content;
 		this.regDate = regDate;

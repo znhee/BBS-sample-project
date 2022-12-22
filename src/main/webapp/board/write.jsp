@@ -23,7 +23,8 @@
                 <div class="row">
 			        <div class="col-1"></div>
 			        <div class="col-10">
-			            <form action="/bbs/board/write" method="post" enctype="multipart/form-data">
+			            <!-- <form action="/bbs/board/write" method="post" enctype="multipart/form-data"> -->
+			            <form action="/bbs/board/write" method="post">
 			                <table class="table table-borderless">
 			                    <tr>
 			                        <td><label for="title">제목</label></td>

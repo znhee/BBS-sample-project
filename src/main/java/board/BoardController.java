@@ -16,23 +16,21 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
+import org.apache.catalina.tribes.util.Arrays;
+
 import db.BoardDao;
 import db.ReplyDao;
+import misc.JSONUtil;
 
 /**
  * Servlet implementation class BoardController
  */
-@WebServlet({ "/board/list", "/board/search", "/board/write", "/board/update", "/board/detail", "/board/delete",
+@WebServlet({ "/board/list", "/board/write", "/board/update", "/board/detail", "/board/delete",
 		"/board/deleteConfirm", "/board/reply" })
-/*
- * @MultipartConfig( fileSizeThreshold = 1024 * 1024 * 1, // 1 MB maxFileSize =
- * 1024 * 1024 * 10, // 10 MB maxRequestSize = 1024 * 1024 * 100 // 100 MB )
- */
 public class BoardController extends HttpServlet {
 
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		request.setCharacterEncoding("utf-8");
 		String[] uri = request.getRequestURI().split("/");
 		String action = uri[uri.length - 1];
 		BoardDao dao = new BoardDao();
@@ -44,7 +42,8 @@ public class BoardController extends HttpServlet {
 		response.setCharacterEncoding("utf-8");
 		response.setContentType("text/html; charset=utf-8");
 		String title = null, content = null, files = null, uid = null, today = null;
-		int bid = 0, totalBoardNo = 0, totalPages = 0;
+		String jsonFiles = "";
+		int bid = 0, totalBoardNo = 0, totalPages = 0, page = 0;
 		Board board = null;
 		List<Board> list = null;
 		List<String> pageList = null;
@@ -52,42 +51,36 @@ public class BoardController extends HttpServlet {
 
 		switch (action) {
 		case "list":
-			int page = Integer.parseInt(request.getParameter("page"));
-			list = dao.listBoard("title", "", page);
+			String page_ = request.getParameter("p");
+			String field = request.getParameter("f");
+			String query = request.getParameter("q");
+			
+			page = (page_ == null || page_.equals("")) ? 1 : Integer.parseInt(page_);
+			field = (field == null || field.equals("")) ? "title" : field;
+			query = (query == null || query.equals("")) ? "" : query;
+			list = dao.listBoard(field, query, page);
 
 			session.setAttribute("currentBoardPage", page);
-			totalBoardNo = dao.getBoardCount("title", "");
+			request.setAttribute("field", field);
+			request.setAttribute("query", query);
+			
+			totalBoardNo = dao.getBoardCount("bid", "");
 			totalPages = (int) Math.ceil(totalBoardNo / 10.);
+			
+			int startPage = (int)(Math.ceil((page-0.5)/10) - 1) * 10 + 1;
+			int endPage = Math.min(totalPages, startPage + 9);
 			pageList = new ArrayList<>();
-			for (int i = 1; i <= totalPages; i++)
+			for (int i = startPage; i <= endPage; i++)
 				pageList.add(String.valueOf(i));
 			request.setAttribute("pageList", pageList);
+			request.setAttribute("startPage", startPage);
+			request.setAttribute("endPage", endPage);
+			request.setAttribute("totalPages", totalPages);
 
 			today = LocalDate.now().toString(); // 2022-12-20
 			request.setAttribute("today", today);
 			request.setAttribute("boardList", list);
-			rd = request.getRequestDispatcher("/board/list.jsp");
-			rd.forward(request, response);
-			break;
-
-		case "search":
-			String field = request.getParameter("field");
-			String query = request.getParameter("query");
-			list = dao.listBoard(field, query, 1);
-			
-			page = 1;
-			session.setAttribute("currentBoardPage", page);
-			totalBoardNo = dao.getBoardCount(field, query);
-			totalPages = (int) Math.ceil(totalBoardNo / 10.);
-			pageList = new ArrayList<>();
-			for (int i = 1; i <= totalPages; i++)
-				pageList.add(String.valueOf(i));
-			request.setAttribute("pageList", pageList);
-			
-			today = LocalDate.now().toString(); // 2022-12-20
-			request.setAttribute("today", today);
-			request.setAttribute("boardList", list);
-			rd = request.getRequestDispatcher("/board/list.jsp");
+			rd = request.getRequestDispatcher("/WEB-INF/view/board/list.jsp");
 			rd.forward(request, response);
 			break;
 			
@@ -100,38 +93,35 @@ public class BoardController extends HttpServlet {
 				dao.increaseViewCount(bid);
 			}
 			board = dao.getBoardDetail(bid);
+			jsonFiles = board.getFiles();
+			if (!(jsonFiles == null || jsonFiles.equals(""))) {
+				JSONUtil json = new JSONUtil();
+				List<String> fileList = json.parse(jsonFiles);
+				request.setAttribute("fileList", fileList);
+			}
 			request.setAttribute("board", board);
 			List<Reply> replyList = replyDao.getReplies(bid);
 			request.setAttribute("replyList", replyList);
 
-			rd = request.getRequestDispatcher("/board/detail.jsp");
+			rd = request.getRequestDispatcher("/WEB-INF/view/board/detail.jsp");
 			rd.forward(request, response);
 			break;
 
 		case "write":
 			if (request.getMethod().equals("GET")) {
-				response.sendRedirect("/bbs/board/write.jsp");
+				rd = request.getRequestDispatcher("/WEB-INF/view/board/write2.jsp");	// Editor version
+				rd.forward(request, response);
+				// response.sendRedirect("/bbs/WEB-INF/view/board/write.jsp");
 			} else {
-				title = request.getParameter("title");
-				content = request.getParameter("content");
-				System.out.println("title: " + title);
+				/**  /board/fileupload 로 부터 전달된 데이터를 읽음 */
+				title = (String) request.getAttribute("title");
+				content = (String) request.getAttribute("content");
+				files = (String) request.getAttribute("files");
+				// System.out.println("title="+title+", files="+files);
 
-				files = request.getParameter("files");
-				/*
-				 * String tmpPath = "c:/Temp/upload"; Part filePart = null; String fileName =
-				 * null; List<String> fileList = new ArrayList<>(); for (int i=1; i<=2; i++) {
-				 * filePart = request.getPart("file" + i); // name이 file1, file2 if (filePart ==
-				 * null) continue; fileName = filePart.getSubmittedFileName();
-				 * System.out.println("file" + i + ": " + fileName); if (fileName == null ||
-				 * fileName.equals("")) continue; fileList.add(fileName);
-				 * 
-				 * for (Part part : request.getParts()) { part.write(tmpPath + File.separator +
-				 * fileName); } }
-				 */
-
-				 board = new Board(sessionUid, title, content, files); 
-				 dao.insertBoard(board);
-				response.sendRedirect("/bbs/board/list?page=1");
+				board = new Board(sessionUid, title, content, files); 
+				dao.insertBoard(board);
+				response.sendRedirect("/bbs/board/list?p=1&f=&q=");
 			}
 			break;
 
@@ -149,29 +139,55 @@ public class BoardController extends HttpServlet {
 
 		case "delete":
 			bid = Integer.parseInt(request.getParameter("bid"));
-			response.sendRedirect("/bbs/board/delete.jsp?bid=" + bid);
+			rd = request.getRequestDispatcher("/WEB-INF/view/board/delete.jsp?bid=" + bid);
+			rd.forward(request, response);
 			break;
 
 		case "deleteConfirm":
 			bid = Integer.parseInt(request.getParameter("bid"));
 			dao.deleteBoard(bid);
-			response.sendRedirect("/bbs/board/list?page=" + session.getAttribute("currentBoardPage"));
+			response.sendRedirect("/bbs/board/list?p=" + session.getAttribute("currentBoardPage") + "&f=&q=");
 			break;
 
 		case "update":
 			if (request.getMethod().equals("GET")) {
 				bid = Integer.parseInt(request.getParameter("bid"));
 				board = dao.getBoardDetail(bid);
+				
+				jsonFiles = board.getFiles();
+				if (!(jsonFiles == null || jsonFiles.equals(""))) {
+					JSONUtil json = new JSONUtil();
+					List<String> fileList = json.parse(jsonFiles);
+					session.setAttribute("fileList", fileList);
+				}
+				
 				request.setAttribute("board", board);
-				rd = request.getRequestDispatcher("/board/update.jsp");
+				rd = request.getRequestDispatcher("/WEB-INF/view/board/update2.jsp");	// Editor version
+				// rd = request.getRequestDispatcher("/WEB-INF/view/board/update.jsp");
 				rd.forward(request, response);
 			} else {
-				bid = Integer.parseInt(request.getParameter("bid"));
-				uid = request.getParameter("uid");
-				title = request.getParameter("title");
-				content = request.getParameter("content");
-				files = request.getParameter("files");
-
+				String bid_ = (String) request.getAttribute("bid");
+				bid = Integer.parseInt(bid_);
+				uid = (String) request.getAttribute("uid");
+				title = (String) request.getAttribute("title");
+				content = (String) request.getAttribute("content");
+				
+				List<String> listAdditionalFiles = (List<String>) session.getAttribute("fileList");
+				
+				String delName = (String) request.getAttribute("delFile");
+				
+				if (!(delName == null || delName.equals(""))) {
+					File delFile = new File("c:/Temp/upload/" + delName);
+					delFile.delete();
+					listAdditionalFiles.remove(delName);
+				}
+				JSONUtil json = new JSONUtil();
+				files = (String) request.getAttribute("files");		// FileUpload에서 넘어온 것
+				List<String> tmpList = json.parse(files);
+				for (String tmp: tmpList)
+					listAdditionalFiles.add(tmp);
+				files = json.stringify(listAdditionalFiles);
+				
 				board = new Board(bid, title, content, files);
 				dao.updateBoard(board);
 				response.sendRedirect("/bbs/board/detail?bid=" + bid + "&uid=" + uid + "&option=DNI");

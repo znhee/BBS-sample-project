@@ -177,7 +177,7 @@ public class BoardController extends HttpServlet {
 				String delName = (String) request.getAttribute("delFile");
 				
 				if (!(delName == null || delName.equals(""))) {
-					File delFile = new File("c:/Temp/upload/" + delName);
+					File delFile = new File("/tmp/upload/" + delName);
 					delFile.delete();
 					listAdditionalFiles.remove(delName);
 				}
